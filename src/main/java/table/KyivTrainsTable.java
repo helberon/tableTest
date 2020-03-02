@@ -6,13 +6,17 @@ import lombok.SneakyThrows;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebElement;
-import net.serenitybdd.core.pages.AnyPage;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Getter
-public class KyivTrainsTable extends BaseTable {
+public class KyivTrainsTable {
+
+    private static By gridPath;
+    private static By rowPath;
+    private static By cellPath;
 
     private WebElement imageIcon;
     private String trainNumber;
@@ -24,36 +28,63 @@ public class KyivTrainsTable extends BaseTable {
     private WebElement buyButton;
     private WebElement rowElement;
 
-    @Override
+
     public void initPaths() {
-        gridPath = By.xpath("//tbody");
+        gridPath = By.xpath(".//tbody");
         rowPath = By.xpath(".//tr");
         cellPath = By.xpath(".//td");
     }
 
     public KyivTrainsTable() {
-        super();
+        initPaths();
     }
 
-    public KyivTrainsTable(RemoteWebElement webElement){
+    public KyivTrainsTable(WebElement webElement){
         this.rowElement = webElement;
         List<WebElement> cells = rowElement.findElements(cellPath);
         this.imageIcon=cells.get(0).findElement(By.xpath(".//img"));
-        this.trainNumber =cells.get(1).findElement(By.xpath(".//a")).getText();
+        if (cells.get(1).findElements(By.xpath(".//img")).size()>0){
+            this.trainNumber=null;
+        }
+        else {
+            this.trainNumber = cells.get(1).findElement(By.xpath(".//a")).getText();
+        }
         this.rout=cells.get(2).getText();
-        this.arrival=cells.get(3).findElement(By.xpath(".//span")).getText();
+        this.arrival=cells.get(3).getText();
         this.wait=cells.get(4).getText();
-        this.departure=cells.get(5).findElement(By.xpath(".//span")).getText();
-        this.schedule=cells.get(6).findElement(By.xpath(".//a"));
-        this.buyButton=cells.get(7).findElement(By.xpath(".//a"));
+        this.departure=cells.get(5).getText();
+
+        if (cells.get(6).findElements(By.xpath(".//div")).size()>0){
+            this.schedule=null;
+        }
+        else {
+            this.schedule=cells.get(6).findElement(By.xpath(".//a"));
+
+        }
+
+        if (cells.get(7).findElements(By.xpath(".//div")).size()>0){
+            this.buyButton=null;
+        }
+        else if (cells.get(7).findElements(By.xpath(".//a")).size()>0){
+            this.buyButton=cells.get(7).findElement(By.xpath(".//a"));
+        }
+        else {
+            this.buyButton=null;
+        }
     }
 
+    public WebElement initTable(WebDriver driver){
+        return driver.findElement(By.xpath("//div[@id='DataTables_Table_0_wrapper']//tbody"));
+    }
 
     @SneakyThrows
-    @Override
-    public List<KyivTrainsTable> getAllItems(WebDriver driver)  {
-        new AnyPage(driver).waitForAngularRequestsToFinish();
-        return super.getAllItems(driver);
+    public List<KyivTrainsTable> getAllItems(WebDriver driver){
+        List<KyivTrainsTable> tableList = new ArrayList<>();
+        List<WebElement> rows = initTable(driver).findElements(rowPath);
+        for (WebElement elem:rows) {
+            tableList.add(new KyivTrainsTable(elem));
+        }
+        return tableList;
     }
 
     @Override

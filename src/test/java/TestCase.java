@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import table.KyivTrainsTable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class TestCase {
@@ -13,12 +14,12 @@ public class TestCase {
     @Before
     public void setupPage() {
         driver = DriverManager.getDriver();
-        driver.get("http://poezdato.net/raspisanie-po-stancyi/kiev-pass/");
+        driver.get("http://poezdato.net/raspisanie-po-stancyi/kiev-pass/19.03.2020/14.55/15.55/");
     }
 
     @Test
-    public void badLoginWithAppropriateEmailFormat() {
-       List<KyivTrainsTable> list= new KyivTrainsTable().getAllItems(driver);
+    public void getTable() {
+        List<KyivTrainsTable> list= new KyivTrainsTable().getAllItems(driver);
         System.out.println(list);
     }
 
